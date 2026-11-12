@@ -1,0 +1,108 @@
+{
+  "title": "eBay Scraper Input",
+  "type": "object",
+  "schemaVersion": 1,
+  "properties": {
+    "productUrls": {
+      "title": "Direct eBay Item URLs",
+      "type": "array",
+      "description": "List of direct eBay listing URLs (e.g. https://www.ebay.com/itm/123456789012).",
+      "prefill": [
+        "https://www.ebay.com/itm/123456789012"
+      ],
+      "editor": "json"
+    },
+    "searchKeywords": {
+      "title": "Search Keywords",
+      "type": "array",
+      "description": "Keywords to search on eBay (e.g. 'iPhone 15 Pro Max', 'Pokemon booster box', 'Nike Dunk Low').",
+      "editor": "json"
+    },
+    "soldItemsOnly": {
+      "title": "Sold & Completed Items Only (Arbitrage Mode)",
+      "type": "boolean",
+      "description": "Filter to extract ONLY items that were actually completed and sold, revealing true historical market sales prices.",
+      "default": false
+    },
+    "listingType": {
+      "title": "Listing Format",
+      "type": "string",
+      "description": "Filter by buying format: Buy It Now (Fixed Price), Auction, or All.",
+      "default": "all",
+      "editor": "select",
+      "enum": [
+        "all",
+        "buyItNow",
+        "auction"
+      ],
+      "enumTitles": [
+        "All Formats",
+        "Buy It Now (Fixed Price)",
+        "Auctions Only"
+      ]
+    },
+    "condition": {
+      "title": "Item Condition",
+      "type": "string",
+      "description": "Filter by physical item condition.",
+      "default": "all",
+      "editor": "select",
+      "enum": [
+        "all",
+        "new",
+        "refurbished",
+        "used"
+      ],
+      "enumTitles": [
+        "All Conditions",
+        "Brand New",
+        "Certified Refurbished / Open Box",
+        "Pre-Owned / Used"
+      ]
+    },
+    "ebayDomain": {
+      "title": "Regional eBay Marketplace",
+      "type": "string",
+      "description": "Select the target regional eBay domain.",
+      "default": "ebay.com",
+      "editor": "select",
+      "enum": [
+        "ebay.com",
+        "ebay.co.uk",
+        "ebay.de",
+        "ebay.ca",
+        "ebay.com.au",
+        "ebay.fr",
+        "ebay.it",
+        "ebay.es"
+      ],
+      "enumTitles": [
+        "United States (ebay.com)",
+        "United Kingdom (ebay.co.uk)",
+        "Germany (ebay.de)",
+        "Canada (ebay.ca)",
+        "Australia (ebay.com.au)",
+        "France (ebay.fr)",
+        "Italy (ebay.it)",
+        "Spain (ebay.es)"
+      ]
+    },
+    "maxProducts": {
+      "title": "Max Products Per Search",
+      "type": "integer",
+      "description": "Maximum number of listing records to extract per keyword.",
+      "default": 40,
+      "minimum": 1,
+      "maximum": 500
+    },
+    "proxyConfiguration": {
+      "title": "Proxy Configuration",
+      "type": "object",
+      "description": "Use Apify Proxy to bypass rate-limiting and regional currency geoblocks.",
+      "default": {
+        "useApifyProxy": true
+      },
+      "editor": "proxy"
+    }
+  }
+}
