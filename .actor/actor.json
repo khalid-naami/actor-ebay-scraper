@@ -1,0 +1,16 @@
+{
+  "actorSpecification": 1,
+  "name": "ebay-scraper",
+  "title": "eBay Arbitrage Scraper (Sold Items, Buy It Now, Auctions & Prices)",
+  "description": "eBay Scraper: Extract active listings and sold completed items, Buy It Now prices, live auction bids, item condition, seller feedback scores, and shipping costs across all international eBay domains. Essential for retail arbitrage, secondary market analytics, and fair market price analytics.",
+  "version": "1.0",
+  "meta": {
+    "templateId": "js-crawlee-playwright"
+  },
+  "dockerfile": "../Dockerfile",
+  "input": "./input_schema.json",
+  "storages": {
+    "dataset": "./dataset_schema.json"
+  },
+  "output": "./output_schema.json"
+}
