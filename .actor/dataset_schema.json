@@ -1,92 +1,178 @@
 {
-  "actorSpecification": 1,
-  "fields": {
-    "type": "object",
-    "properties": {
-      "itemId": {
-        "type": "string",
-        "description": "Unique 12-digit eBay Item Number"
-      },
-      "title": {
-        "type": "string",
-        "description": "Full listing title"
-      },
-      "price": {
-        "type": "number",
-        "description": "Current Buy It Now, auction bid, or final sold price"
-      },
-      "originalPrice": {
-        "type": "number",
-        "description": "Original retail price before discount if applicable"
-      },
-      "currency": {
-        "type": "string",
-        "description": "Currency code (USD, GBP, EUR, etc.)"
-      },
-      "shippingCost": {
-        "type": "string",
-        "description": "Shipping fee or 'Free shipping'"
-      },
-      "condition": {
-        "type": "string",
-        "description": "Item condition (Brand New, Pre-Owned, Refurbished, For parts)"
-      },
-      "listingType": {
-        "type": "string",
-        "description": "Listing format: 'Buy It Now' or 'Auction'"
-      },
-      "bidsCount": {
-        "type": "integer",
-        "description": "Total number of bids placed if auction"
-      },
-      "isSold": {
-        "type": "boolean",
-        "description": "Whether the listing is an officially completed/sold transaction"
-      },
-      "soldDate": {
-        "type": "string",
-        "description": "Date transaction was completed (e.g. 'Sold Nov 8, 2026')"
-      },
-      "sellerName": {
-        "type": "string",
-        "description": "Seller username"
-      },
-      "sellerFeedbackScore": {
-        "type": "integer",
-        "description": "Total seller feedback score number"
-      },
-      "sellerPositiveFeedback": {
-        "type": "string",
-        "description": "Seller positive feedback percentage (e.g. '99.6%')"
-      },
-      "topRatedSeller": {
-        "type": "boolean",
-        "description": "Whether seller holds Top Rated or Top Rated Plus badge"
-      },
-      "location": {
-        "type": "string",
-        "description": "Item physical dispatch location"
-      },
-      "returns": {
-        "type": "string",
-        "description": "Return policy terms"
-      },
-      "thumbnail": {
-        "type": "string",
-        "description": "Primary high-resolution listing image URL"
-      },
-      "images": {
-        "type": "array",
-        "description": "Full gallery of high-resolution product photos"
-      },
-      "url": {
-        "type": "string",
-        "description": "Canonical eBay item URL"
-      },
-      "scrapedAt": {
-        "type": "string",
-        "description": "Timestamp of extraction"
-      }
+    "actorSpecification": 1,
+    "fields": {
+        "type": "object",
+        "properties": {
+            "itemId": {
+                "type": "string",
+                "description": "Unique 12-digit eBay Item Number",
+                "nullable": true
+            },
+            "title": {
+                "type": "string",
+                "description": "Full listing title",
+                "nullable": true
+            },
+            "price": {
+                "type": "number",
+                "description": "Current Buy It Now, auction bid, or final sold price",
+                "nullable": true
+            },
+            "originalPrice": {
+                "type": "number",
+                "description": "Original retail price before discount if applicable",
+                "nullable": true
+            },
+            "currency": {
+                "type": "string",
+                "description": "Currency code (USD, GBP, EUR, etc.)",
+                "nullable": true
+            },
+            "shippingCost": {
+                "type": "string",
+                "description": "Shipping fee or 'Free shipping'",
+                "nullable": true
+            },
+            "condition": {
+                "type": "string",
+                "description": "Item condition (Brand New, Pre-Owned, Refurbished, For parts)",
+                "nullable": true
+            },
+            "listingType": {
+                "type": "string",
+                "description": "Listing format: 'Buy It Now' or 'Auction'",
+                "nullable": true
+            },
+            "bidsCount": {
+                "type": "integer",
+                "description": "Total number of bids placed if auction",
+                "nullable": true
+            },
+            "isSold": {
+                "type": "boolean",
+                "description": "Whether the listing is an officially completed/sold transaction",
+                "nullable": true
+            },
+            "soldDate": {
+                "type": "string",
+                "description": "Date transaction was completed (e.g. 'Sold Nov 8, 2026')",
+                "nullable": true
+            },
+            "sellerName": {
+                "type": "string",
+                "description": "Seller username",
+                "nullable": true
+            },
+            "sellerFeedbackScore": {
+                "type": "integer",
+                "description": "Total seller feedback score number",
+                "nullable": true
+            },
+            "sellerPositiveFeedback": {
+                "type": "string",
+                "description": "Seller positive feedback percentage (e.g. '99.6%')",
+                "nullable": true
+            },
+            "topRatedSeller": {
+                "type": "boolean",
+                "description": "Whether seller holds Top Rated or Top Rated Plus badge",
+                "nullable": true
+            },
+            "location": {
+                "type": "string",
+                "description": "Item physical dispatch location",
+                "nullable": true
+            },
+            "returns": {
+                "type": "string",
+                "description": "Return policy terms",
+                "nullable": true
+            },
+            "thumbnail": {
+                "type": "string",
+                "description": "Primary high-resolution listing image URL",
+                "nullable": true
+            },
+            "images": {
+                "type": "array",
+                "description": "Full gallery of high-resolution product photos",
+                "nullable": true,
+                "items": {
+                    "type": "string"
+                }
+            },
+            "searchKeyword": {
+                "type": "string",
+                "description": "Search keyword used when discovered via eBay search",
+                "nullable": true
+            },
+            "url": {
+                "type": "string",
+                "description": "Canonical eBay item URL",
+                "nullable": true
+            },
+            "scrapedAt": {
+                "type": "string",
+                "description": "Timestamp of extraction",
+                "nullable": true
+            }
+        },
+        "$schema": "http://json-schema.org/draft-07/schema#",
+        "additionalProperties": true,
+        "required": []
+    },
+    "views": {
+        "overview": {
+            "title": "Overview",
+            "transformation": {
+                "fields": [
+                    "itemId",
+                    "title",
+                    "price",
+                    "originalPrice",
+                    "currency",
+                    "shippingCost",
+                    "condition",
+                    "listingType"
+                ]
+            },
+            "display": {
+                "component": "table",
+                "properties": {
+                    "itemId": {
+                        "label": "itemId",
+                        "format": "text"
+                    },
+                    "title": {
+                        "label": "title",
+                        "format": "text"
+                    },
+                    "price": {
+                        "label": "price",
+                        "format": "number"
+                    },
+                    "originalPrice": {
+                        "label": "originalPrice",
+                        "format": "number"
+                    },
+                    "currency": {
+                        "label": "currency",
+                        "format": "text"
+                    },
+                    "shippingCost": {
+                        "label": "shippingCost",
+                        "format": "text"
+                    },
+                    "condition": {
+                        "label": "condition",
+                        "format": "text"
+                    },
+                    "listingType": {
+                        "label": "listingType",
+                        "format": "text"
+                    }
+                }
+            }
+        }
     }
-  }
 }
