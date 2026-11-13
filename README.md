@@ -23,8 +23,8 @@ Extract live eBay product listings, sold & completed transactions, Buy It Now pr
 
 | Field | Type | Default | Description |
 |---|---|---|---|
-| `productUrls` | Array | `["https://www.ebay.com/itm/..."]` | List of direct eBay item URLs. |
-| `searchKeywords` | Array | `[]` | Keywords to search on eBay (e.g. `'iPhone 15 Pro Max'`). |
+| `productUrls` | Array | `[]` | List of direct eBay item URLs (leave empty to search by keywords). |
+| `searchKeywords` | Array | `["iphone 15 pro max"]` | Keywords to search on eBay (e.g. `'iPhone 15 Pro Max'`). |
 | `soldItemsOnly` | Boolean | `false` | When true, extracts only completed and sold listings. |
 | `listingType` | String | `"all"` | Filter by format: `all`, `buyItNow` (Fixed Price), `auction`. |
 | `condition` | String | `"all"` | Filter by condition: `all`, `new`, `refurbished`, `used`. |
