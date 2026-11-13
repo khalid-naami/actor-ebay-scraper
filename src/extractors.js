@@ -15,6 +15,7 @@ export function extractEbayItemId(url) {
  * Clean numeric price from string
  */
 export function parseEbayPrice(raw) {
+    if (typeof raw === 'number') return Number.isFinite(raw) ? raw : null;
     if (!raw || typeof raw !== 'string') return null;
     const parts = raw.split(/\s+to\s+|\s*-\s*/);
     const target = parts[0];
@@ -50,6 +51,7 @@ export function parseEbayCurrency(raw, domain = 'ebay.com') {
  * Clean numeric feedback score
  */
 export function parseEbayFeedbackScore(raw) {
+    if (typeof raw === 'number') return Number.isFinite(raw) ? Math.trunc(raw) : null;
     if (!raw || typeof raw !== 'string') return null;
     const digits = raw.replace(/[^\d]/g, '');
     return digits ? parseInt(digits, 10) : null;
