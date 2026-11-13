@@ -7,14 +7,33 @@ import {
     parseEbaySearchHtml,
 } from './extractors.js';
 
+function sanitizeRecord(obj) {
+    if (Array.isArray(obj)) return obj.map((item) => sanitizeRecord(item));
+    if (!obj || typeof obj !== 'object') return obj;
+    const clean = {};
+    for (const [k, v] of Object.entries(obj)) {
+        if (v !== null && v !== undefined && !(typeof v === 'number' && !Number.isFinite(v))) {
+            clean[k] = Array.isArray(v)
+                ? v.map((item) => (item && typeof item === 'object' ? sanitizeRecord(item) : item))
+                : v && typeof v === 'object' && !(v instanceof Date)
+                    ? sanitizeRecord(v)
+                    : v;
+        }
+    }
+    return clean;
+}
+
+function isProxyTransportError(errOrStatus) {
+    const msg = String(errOrStatus?.message || errOrStatus || '');
+    return errOrStatus === 597 || errOrStatus === 407 || /597|UPSTREAM407|407|Proxy responded with|tunneling socket/i.test(msg);
+}
+
 await Actor.init();
 
 try {
     const input = (await Actor.getInput()) || {};
     const {
-        productUrls = [
-            'https://www.ebay.com/itm/123456789012',
-        ],
+        productUrls = [],
         searchKeywords = [],
         soldItemsOnly = false,
         listingType = 'all',
@@ -27,14 +46,34 @@ try {
     log.info(`Starting eBay Arbitrage Scraper (Domain: ${ebayDomain}, Sold Items Only: ${soldItemsOnly})...`);
 
     // Setup Proxy
+    let proxyConfig = null;
     let proxyUrl = undefined;
     if (proxyConfiguration) {
-        const proxyConfig = await Actor.createProxyConfiguration(proxyConfiguration);
-        if (proxyConfig) {
-            proxyUrl = await proxyConfig.newUrl();
-            log.info('Proxy enabled successfully');
+        try {
+            proxyConfig = await Actor.createProxyConfiguration(proxyConfiguration);
+            if (proxyConfig) {
+                proxyUrl = await proxyConfig.newUrl();
+                log.info('Proxy enabled successfully');
+            }
+        } catch (proxyErr) {
+            log.warning(`Proxy initialization failed (${proxyErr.message}); continuing with direct connection.`);
         }
     }
+
+    const rotateOrDisableProxy = async (err) => {
+        if (!isProxyTransportError(err)) return;
+        if (proxyConfig) {
+            try {
+                proxyUrl = await proxyConfig.newUrl();
+                log.warning('Rotated Apify Proxy session after upstream proxy transport error.');
+                return;
+            } catch {
+                // Fall through to disable proxy
+            }
+        }
+        proxyUrl = undefined;
+        log.warning('Disabled broken proxy session; falling back to direct connection.');
+    };
 
     let totalProductsScraped = 0;
     let soldItemsCount = 0;
@@ -71,11 +110,17 @@ try {
         return browser;
     };
 
-    // 1. Process Direct Product URLs
-    if (Array.isArray(productUrls) && productUrls.length > 0) {
-        log.info(`Processing ${productUrls.length} direct eBay item URLs...`);
+    const effectiveProductUrls = Array.isArray(productUrls) && productUrls.length > 0
+        ? productUrls
+        : (!Array.isArray(searchKeywords) || searchKeywords.length === 0)
+            ? ['https://www.ebay.com/itm/123456789012']
+            : [];
 
-        for (const rawUrl of productUrls) {
+    // 1. Process Direct Product URLs
+    if (effectiveProductUrls.length > 0) {
+        log.info(`Processing ${effectiveProductUrls.length} direct eBay item URLs...`);
+
+        for (const rawUrl of effectiveProductUrls) {
             const targetUrl = typeof rawUrl === 'string' ? rawUrl : rawUrl?.url;
             if (!targetUrl) continue;
 
@@ -99,6 +144,7 @@ try {
                     product = parseEbayProductHtml(html, targetUrl, ebayDomain);
                 }
             } catch (err) {
+                await rotateOrDisableProxy(err);
                 log.debug(`gotScraping error for ${targetUrl}: ${err.message}`);
             }
 
@@ -115,12 +161,13 @@ try {
                     product = parseEbayProductHtml(html, targetUrl, ebayDomain);
                     await page.close();
                 } catch (bErr) {
+                    await rotateOrDisableProxy(bErr);
                     log.warning(`Browser fallback error for ${targetUrl}: ${bErr.message}`);
                 }
             }
 
             if (product && product.title) {
-                await Actor.pushData(product);
+                await Actor.pushData(sanitizeRecord(product));
                 totalProductsScraped++;
                 if (product.isSold) soldItemsCount++;
                 if (product.listingType === 'Buy It Now') buyItNowCount++;
@@ -174,6 +221,7 @@ try {
                     });
                     html = response.body;
                 } catch (err) {
+                    await rotateOrDisableProxy(err);
                     log.debug(`Direct search request failed: ${err.message}`);
                 }
 
@@ -191,7 +239,7 @@ try {
 
                 for (const item of sliced) {
                     item.searchKeyword = keyword;
-                    await Actor.pushData(item);
+                    await Actor.pushData(sanitizeRecord(item));
                     totalProductsScraped++;
                     if (item.isSold) soldItemsCount++;
                     if (item.listingType === 'Buy It Now') buyItNowCount++;
@@ -217,16 +265,20 @@ try {
         buyItNowCount,
         auctionsCount,
         domain: ebayDomain,
-        status: 'SUCCEEDED',
+        status: totalProductsScraped > 0 ? 'SUCCEEDED' : 'FAILED',
         scrapedAt: new Date().toISOString(),
     };
 
     await Actor.setValue('OUTPUT', summary);
+    if (totalProductsScraped === 0) {
+        await Actor.fail('Extracted 0 products. Verify target URLs, keywords, or proxy configuration.');
+    }
     log.info(`eBay Scraping finished successfully! Total items: ${totalProductsScraped}`);
 
 } catch (err) {
     log.error(`Fatal execution error: ${err.message}`, { stack: err.stack });
     await Actor.setValue('OUTPUT', { status: 'FAILED', error: err.message });
+    await Actor.fail(err.message);
 } finally {
     await Actor.exit();
 }
